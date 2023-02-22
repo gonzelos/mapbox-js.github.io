@@ -12,7 +12,7 @@ let mapData =  savedData ? JSON.parse(savedData) : {
   zoom: 8.9,
   frTitPos: "center",
   frTitle: "Warsaw, Masovian Voivodeship, Poland",
-  backTitle: "Forever with me.",
+  backTitle: "Stand by me",
 };
 https://api.mapbox.com/styles/v1/kalyanim/cl4wx14c8000414phyrmwiydh/static/2.3469669999999496,48.85882814410559,11.490932726824349,0.00,0.00/980x1110@2x?access_token=pk.eyJ1Ijoia2FseWFuaW0iLCJhIjoiY2p4bGhjZGE3MDU5eTNvbXpzc2l6aXVpcyJ9.0wnkJTR_gPHeqYprC32C8A
 
