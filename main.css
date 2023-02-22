@@ -197,8 +197,13 @@
 }
 
 .stylecircle {
+  border-radius: 50%;
   margin-right: 6px;
   cursor: pointer;
+}
+
+.stylecircleoption.active {
+  border: 1px solid black;
 }
 
 .frame {
@@ -226,9 +231,9 @@
 
 .map-poster {
   position:relative;
-  width: 441px;
+  width: 440px;
   height: 560px;
-  background-image: url(img/frame3.png);
+  background-image: url(img/oak.png);
   background-size: 100% 100%;
   display: flex;
   padding-top: 48px;
@@ -242,5 +247,37 @@
   bottom: -25px;
   color: #c66a3f;
   font-size: 20px;
+}
 
+.color-picker {
+  height: 48px;
+}
+
+.shape {
+  height: 50px;
+}
+
+.remove:hover
+   {
+    opacity: 0.5;
+  }
+  
+.remove {
+  font-size: 18px;
+  padding-top: 15px;
+}
+
+.imageUrl {
+  overflow-wrap: anywhere;
+  color: #00853e;
+}
+
+.address-icon {
+  font-size:24px;
+  color:black;
+  padding-right:8px;
+}
+
+.fr-icon {
+  padding-right: 10px;
 }

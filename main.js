@@ -1,22 +1,23 @@
-mapboxgl.accessToken = 'pk.eyJ1IjoiaHViZXJ0dXoiLCJhIjoiY2xkeW93Zm15MHR1ejNucGgwbjhzeWw1dyJ9.EP-HZ_ZgqOz64OYZL1Yz7w';
+mapboxgl.accessToken = 'pk.eyJ1IjoiaHViZXJ0dXoiLCJhIjoiY2lqdGtrdWkwMDQ3enRha3MybG44Ym1vciJ9.7V6Q9IJm5P5NVsW5mVttFQ';
 
 let savedData = localStorage.getItem("currentMapData");
 
 let mapData =  savedData ? JSON.parse(savedData) : {
   width: 340,
   height: 440,
-  lng: 21.06,
-  lat: 52.23,
-  style_id: "streets-v12",
+  lng: -122.44944,//21.06,
+  lat: 37.76803,//52.23,
+  style_id: "clecywkgm002801qro1y8p3eu",
   bearing: 0,
-  zoom: 8.74,
+  zoom: 8.9,
   frTitPos: "center",
   frTitle: "Warsaw, Masovian Voivodeship, Poland",
   backTitle: "Forever with me.",
 };
+https://api.mapbox.com/styles/v1/kalyanim/cl4wx14c8000414phyrmwiydh/static/2.3469669999999496,48.85882814410559,11.490932726824349,0.00,0.00/980x1110@2x?access_token=pk.eyJ1Ijoia2FseWFuaW0iLCJhIjoiY2p4bGhjZGE3MDU5eTNvbXpzc2l6aXVpcyJ9.0wnkJTR_gPHeqYprC32C8A
 
 function setMapData() {
-  const str = `https://api.mapbox.com/styles/v1/mapbox/${mapData.style_id}/static/${mapData.lng},${mapData.lat},${mapData.zoom},${mapData.bearing}/${mapData.width}x${mapData.height}@2x?access_token=${mapboxgl.accessToken}`;
+  const str = `https://api.mapbox.com/styles/v1/hubertuz/${mapData.style_id}/static/${mapData.lng},${mapData.lat},${mapData.zoom},${mapData.bearing}/${mapData.width}x${mapData.height}@2x?access_token=${mapboxgl.accessToken}`;
   $("#downloadImage").attr('href', str);
   $("#imageUrl").text(str);
   $("#front-string").val(mapData.frTitle);
@@ -25,13 +26,14 @@ function setMapData() {
   $(".back-title").text(mapData.backTitle);
   $(".citymap-poster-tagline").text(getDisplayLngLat());
   // $("#widthLabel").text(`Width: ${mapData.width}px`);
+  // $("#heigtLabel").text(`Height: ${mapData.height}px`);
   
   localStorage.setItem("currentMapData", JSON.stringify(mapData));
 }
 
 const map = new mapboxgl.Map({
   container: 'map',
-  style: "mapbox://styles/mapbox/" + mapData.style_id,
+  style: "mapbox://styles/hubertuz/" + mapData.style_id,
   center: [mapData.lng, mapData.lat],
   zoom: mapData.zoom,
   scrollZoom: true
@@ -61,6 +63,19 @@ map.on('load', () => {
   let serarchInput = geocoderSearch.onAdd(map);
   $("#geocoderSearchWrap").append(serarchInput);
   map.addControl(new mapboxgl.NavigationControl());
+  $(".mapboxgl-ctrl-geocoder--input").on({
+    change: function(e) {
+      console.log(e.target.value,$(this).val());
+      mapData.frTitle=$(this).val();
+      // $("#front-string").val(e.target.value);
+      // $(".citymap-poster-name").text(e.target.value);
+    }
+  });
+  // $("#front-string").on({
+  //   change: function(change) {
+  //     $(".city-map-postername").val($(this).val());
+  //   }
+  // })
 });
 
 // map.on('click', (event) => {
@@ -110,6 +125,16 @@ $(document).ready(function(){
     },  
   });
 
+  $(".stylecircleoption").on({
+    click: function(){
+      $(".stylecircleoption").removeClass('active');
+      $(this).addClass('active');
+      mapData.style_id=$(this).data('style_id')
+      map.setStyle("mapbox://styles/hubertuz/" + mapData.style_id);
+      setMapData()
+    },  
+  });
+
   $("input[name=position-option]").on({
     change: function(e) {
       console.log(e.target.value, $(this).val())
@@ -131,6 +156,11 @@ $(document).ready(function(){
       setMapData();
     }
   });
-  
+
+  $("#color-picker").on('change', function(e) {
+    $(".address-icon").css("color", $("#color-picker").val());
+    console.log($("#color-picker").val());
+  });
+
 });
   
