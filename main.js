@@ -14,12 +14,11 @@ let mapData =  savedData ? JSON.parse(savedData) : {
   frTitle: "Warsaw, Masovian Voivodeship, Poland",
   backTitle: "Stand by me forever",
 };
-https://api.mapbox.com/styles/v1/kalyanim/cl4wx14c8000414phyrmwiydh/static/2.3469669999999496,48.85882814410559,11.490932726824349,0.00,0.00/980x1110@2x?access_token=pk.eyJ1Ijoia2FseWFuaW0iLCJhIjoiY2p4bGhjZGE3MDU5eTNvbXpzc2l6aXVpcyJ9.0wnkJTR_gPHeqYprC32C8A
 
 function setMapData() {
-  const str = `https://api.mapbox.com/styles/v1/hubertuz/${mapData.style_id}/static/${mapData.lng},${mapData.lat},${mapData.zoom},${mapData.bearing}/${mapData.width}x${mapData.height}@2x?access_token=${mapboxgl.accessToken}`;
+  const str = `https://api.mapbox.com/styles/v1/hubertuz/${mapData.style_id}/static/${mapData.lng},${mapData.lat},${mapData.zoom}/${mapData.width}x${mapData.height}?access_token=${mapboxgl.accessToken}`;
   $("#downloadImage").attr('href', str);
-  $("#imageUrl").text(str);
+  // $("#image").attr("src", str);
   $("#front-string").val(mapData.frTitle);
   $(".citymap-poster-name").text(mapData.frTitle);
   $("#back-string").val(mapData.backTitle);
@@ -162,5 +161,35 @@ $(document).ready(function(){
     console.log($("#color-picker").val());
   });
 
+  $("#downloadImage").click((e) => {
+    e.preventDefault();
+    // Get a reference to the image element
+    // var img = document.querySelectorAll("img")[9];
+    var img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.src = e.target.href;
+    console.log(e.target.href);
+    // Create a canvas element
+img.onload = () => {
+  var canvas = document.createElement('canvas');
+    canvas.width = mapData.width;
+    canvas.height = mapData.height;
+
+    // Get the rendering context for the canvas
+    var context = canvas.getContext('2d');
+
+    // Draw the image onto the canvas
+    context.drawImage(img, 0, 0);
+
+    // Convert the canvas to an image file
+    var dataURL = canvas.toDataURL('image/png');
+
+    // Save the image file
+    var link = document.createElement('a');
+    link.download = 'image.png';
+    link.href = dataURL;
+    link.click();
+}
+  });
 });
   
