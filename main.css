@@ -312,6 +312,21 @@
   cursor: pointer;
 }
 
+.px-scale-wrapper {
+  border: 1px solid #111;
+  padding: 3px 0;
+  /* width: 65px;
+  height: 65px; */
+  cursor: pointer;
+  border-radius: 10px;
+  width: 23%;
+}
+
+.px-scale-wrapper.active {
+  background-color: #aaa;
+  font-weight: bold;
+}
+
 .size-type {
   border: 1px solid #111;
 }
@@ -342,6 +357,20 @@
   font-size: 11px;
   text-align: center;
   color: #111;
+}
+
+.px-scale-value {
+  margin-bottom:auto;
+  font-size: 15px;
+  text-align: center;
+  color: #bb3636;
+}
+
+.px-type {
+  font-size: 15px;
+  text-align: center;
+  color: #111;
+  margin-bottom: 0px;
 }
 
 .size-unit-wrapper {

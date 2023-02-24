@@ -85,6 +85,7 @@ let mapData =  savedData ? JSON.parse(savedData) : {
     viewType: "square",
     scale: 0,
     unit: "cm",
+    downloadSize: 500
   },
   lng: -122.44944,//21.06,
   lat: 37.76803,//52.23,
@@ -102,6 +103,7 @@ function setMapView(w, h) {
   $(".map-poster").css('width', w + 100);
   $(".map-poster").css('height', h + 120);
   map.resize();
+  // $(".mapboxgl-ctrl-logo").remove();
 }
 
 function renderScaleButton() {
@@ -136,6 +138,7 @@ function setMapData() {
   $(".citymap-poster-tagline").text(getDisplayLngLat());
   
   $(`.size-type-div > .size-unit-wrapper > .size-unit[data-value=${mapData.config.unit}]`).addClass("active");
+  $(`.px-scale-wrapper[data-value=${mapData.config.downloadSize}]`).addClass("active");
   $(`.size-type-div > .size-type-wrapper[data-value=${mapData.config.viewType}]`).trigger("click");
 
   $('.map-poster').css("opacity", 1);
@@ -157,14 +160,13 @@ function download(imgUrl, fileName) {
       var canvas = document.createElement('canvas');
       let viewType = mapData.config.viewType;
       if(viewType == "square") {
-        canvas.width = 2000;
-        canvas.height = 2000;
+        canvas.width = canvas.height = mapData.config.downloadSize;
       } else if(viewType == "portrait") {
-        canvas.width = 1700;
-        canvas.height = 2200;
+        canvas.width = mapData.config.downloadSize * 0.87;
+        canvas.height = mapData.config.downloadSize * 1.13;
       } else {
-        canvas.width = 2200;
-        canvas.height = 1700;
+        canvas.width = mapData.config.downloadSize * 1.13;
+        canvas.height = mapData.config.downloadSize * 0.87;
       }
 
       // Get the rendering context for the canvas
@@ -197,6 +199,8 @@ function getDisplayLngLat() {
 }
 
 function init() {
+  $(".mapboxgl-ctrl-logo").remove();
+  $(".mapboxgl-ctrl-bottom-right").remove();
   renderScaleButton();
   setMapData()
 }
@@ -223,6 +227,7 @@ map.on('load', () => {
   //     $(".city-map-postername").val($(this).val());
   //   }
   // })
+
 });
 
 // map.on('click', (event) => {
@@ -230,6 +235,8 @@ map.on('load', () => {
 // });
 
 $(document).ready(function(){
+
+  mapData:logo_enabled="false";
 
   map.on('moveend',() => {
   
@@ -250,7 +257,7 @@ $(document).ready(function(){
       $(this).addClass('active');
       let bgUrl = $(this).data('bgurl');
         $(".map-poster").css("background-image", `url(${bgUrl})`);
-    },  
+    }, 
   });
 
   $(".stylecircleoption").on({
@@ -269,6 +276,14 @@ $(document).ready(function(){
       $(this).addClass('active');
       
     },  
+  });
+
+  $(".px-scale-wrapper").on({
+    click: function() {
+      $(".px-scale-wrapper").removeClass('active');
+      $(this).addClass('active');
+      mapData.config.downloadSize = $(this).data('value');
+    },
   });
 
   $("input[name=position-option]").on({
@@ -386,4 +401,5 @@ $(document).ready(function(){
       console.log('Marker dragged to', event.target.getLngLat());
     });
   });
+
 })
