@@ -87,13 +87,13 @@ let mapData =  savedData ? JSON.parse(savedData) : {
     unit: "cm",
     downloadSize: 500
   },
-  lng: -122.44944,//21.06,
-  lat: 37.76803,//52.23,
+  lng: -122.42,//21.06,
+  lat: 37.77,//52.23,
   style_id: "clecywkgm002801qro1y8p3eu",
   bearing: 0,
   zoom: 8.9,
   frTitPos: "center",
-  frTitle: "Warsaw, Masovian Voivodeship, Poland",
+  frTitle: "San Francisco, California, United States",
   backTitle: "Stand by me forever",
 };
 
