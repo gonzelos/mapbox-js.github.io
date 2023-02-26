@@ -110,15 +110,15 @@
             <div class="accordion-body">
               <div class="d-flex justify-content-center">
                 <div class="fr-icon">
-                  <img src="img/f1.png" class="frame frameOption active" data-bgurl="img/oak.png">
+                  <img src="img/f1.png" class="frame frameOption" data-value="oak" data-bgurl="img/oak.png">
                   <p style="text-align: center;">Oak<p>
                 </div>
                 <div class="fr-icon">
-                  <img src="img/f2.png" class="frame frameOption" data-bgurl="img/black.png">
+                  <img src="img/f2.png" class="frame frameOption" data-value="black" data-bgurl="img/black.png">
                   <p style="text-align: center;">Black</p>
                 </div>
                 <div class="fr-icon">
-                  <img src="img/f3.png" class="frame frameOption" data-bgurl="img/white.png">
+                  <img src="img/f3.png" class="frame frameOption" data-value="white" data-bgurl="img/white.png">
                   <p style="text-align: center;">White</p>
                 </div>
               </div>
@@ -145,14 +145,24 @@
               <div class="shape d-flex align-items-center">
                 <div>Shape : &nbsp; </div>
                 <div class="d-flex">
-                  <!-- <img src="address-icon img/red-heart-icon.png" alt="red-heart"> -->
-                  <i class="address-icon fa fa-heart" style="color:red" draggable="true"></i>
-                  <i class="address-icon fa fa-home" draggable="true"></i>
-                  <i class="address-icon fa fa-star" draggable="true"></i>
-                  <i class='address-icon fa fa-plane' draggable="true"></i>
-                  <i class='address-icon fas fa-skiing' draggable="true"></i>
+                  <div style="width: 50px; height: 30px;">
+                    <i class="address-icon fa fa-heart" style="color:red"></i>
+                  </div>
+                  <div style="width: 50px; height: 30px;">
+                    <i class="address-icon fa fa-home"></i>
+                  </div>
+                  <div style="width: 50px; height: 30px;">
+                    <i class="address-icon fa fa-star"></i>
+                  </div>
+                  <div style="width: 50px; height: 30px;">
+                    <i class='address-icon fa fa-plane'></i>
+                  </div>
+                  <div style="width: 50px; height: 30px;">
+                    <i class='address-icon fas fa-skiing'></i>
+                  </div>
                 </div>
               </div>
+              <div id="markerpos" class="markerpos"></div>
             </div>
         </div>
       </div>

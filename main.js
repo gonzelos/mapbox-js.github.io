@@ -95,6 +95,8 @@ let mapData =  savedData ? JSON.parse(savedData) : {
   frTitPos: "center",
   frTitle: "San Francisco, California, United States",
   backTitle: "Stand by me forever",
+  frameOption: 'oak',
+  markers: [],
 };
 
 function setMapView(w, h) {
@@ -136,10 +138,10 @@ function setMapData() {
   $("#back-string").val(mapData.backTitle);
   $(".back-title").text(mapData.backTitle);
   $(".citymap-poster-tagline").text(getDisplayLngLat());
-  
   $(`.size-type-div > .size-unit-wrapper > .size-unit[data-value=${mapData.config.unit}]`).addClass("active");
   $(`.px-scale-wrapper[data-value=${mapData.config.downloadSize}]`).addClass("active");
   $(`.size-type-div > .size-type-wrapper[data-value=${mapData.config.viewType}]`).trigger("click");
+  $(`.frameOption[data-value='${mapData.frameOption}']`).trigger("click");
 
   $('.map-poster').css("opacity", 1);
   
@@ -227,7 +229,46 @@ map.on('load', () => {
   //     $(".city-map-postername").val($(this).val());
   //   }
   // })
+  let selectedMarker;
+  $(".address-icon").on({
+    click: function(e) {
+      var markerElement = document.createElement('div');
+      markerElement.appendChild(e.target.cloneNode());
+      const marker = new mapboxgl.Marker({
+        draggable: true,
+        element:markerElement
+      })
+      .setLngLat([mapData.lng, mapData.lat])
+      .addTo(map);
+      // selectedMarker = marker;
+      // markers.push(marker);
+      markerElement.addEventListener('click', function (e) {
+        // console.log(e);
+        if(selectedMarker) {
+          selectedMarker.find('.address-icon').removeClass('active');
+        }
+        $(this).find('.address-icon').addClass('active');
+        selectedMarker = $(this);
+      });
+      function onDragEnd() {
+        const lngLat = marker.getLngLat();
+        // markerpos.style.display = 'block';
+          $("#markerpos").text(`Longitude: ${lngLat.lng} Latitude: ${lngLat.lat}`);
+      }
+      marker.on('dragend', onDragEnd);
+    }
+  })
 
+  $(".remove-icon").on({
+    click: function () {
+      if(selectedMarker) {
+        selectedMarker.remove();
+        selectedMarker = undefined;
+      } else {
+        alert("Please select maker!");
+      }
+    }
+  })
 });
 
 // map.on('click', (event) => {
@@ -256,7 +297,12 @@ $(document).ready(function(){
       $(".frameOption").removeClass('active');
       $(this).addClass('active');
       let bgUrl = $(this).data('bgurl');
-        $(".map-poster").css("background-image", `url(${bgUrl})`);
+      $(".map-poster").css("background-image", `url(${bgUrl})`);
+        if(mapData.frameOption == $(this).data('value')) {
+          return;
+        }
+        mapData.frameOption = $(this).data('value');
+        setMapData();
     }, 
   });
 
@@ -270,13 +316,13 @@ $(document).ready(function(){
     },  
   });
 
-  $(".frameType").on({
-    click: function(){
-      $(".frameType").removeClass('active');
-      $(this).addClass('active');
+  // $(".frameType").on({
+  //   click: function(){
+  //     $(".frameType").removeClass('active');
+  //     $(this).addClass('active');
       
-    },  
-  });
+  //   },  
+  // });
 
   $(".px-scale-wrapper").on({
     click: function() {
