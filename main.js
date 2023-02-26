@@ -75,7 +75,7 @@ let config = {
     }
   },
 }
-
+let selectedMarker;
 mapboxgl.accessToken = 'pk.eyJ1IjoiaHViZXJ0dXoiLCJhIjoiY2lqdGtrdWkwMDQ3enRha3MybG44Ym1vciJ9.7V6Q9IJm5P5NVsW5mVttFQ';
 
 let savedData = localStorage.getItem("currentMapData");
@@ -96,8 +96,12 @@ let mapData =  savedData ? JSON.parse(savedData) : {
   frTitle: "San Francisco, California, United States",
   backTitle: "Stand by me forever",
   frameOption: 'oak',
-  markers: [],
+  markers: {},
 };
+
+function saveMapData() {
+  localStorage.setItem("currentMapData", JSON.stringify(mapData));
+}
 
 function setMapView(w, h) {
   $("#map").css('width', w);
@@ -144,8 +148,6 @@ function setMapData() {
   $(`.frameOption[data-value='${mapData.frameOption}']`).trigger("click");
 
   $('.map-poster').css("opacity", 1);
-  
-  localStorage.setItem("currentMapData", JSON.stringify(mapData));
 }
 
 function getImgLink(style_id) {
@@ -224,60 +226,40 @@ map.on('load', () => {
       // $(".citymap-poster-name").text(e.target.value);
     }
   });
-  // $("#front-string").on({
-  //   change: function(change) {
-  //     $(".city-map-postername").val($(this).val());
-  //   }
-  // })
-  let selectedMarker;
-  $(".address-icon").on({
-    click: function(e) {
-      var markerElement = document.createElement('div');
-      markerElement.appendChild(e.target.cloneNode());
+  for (const key in mapData.markers) {
+    if (Object.hasOwnProperty.call(mapData.markers, key)) {
+      const markerLoc = mapData.markers[key];
+      let markerElement = document.createElement('div');
+      let [name, markerId] = key.split('_');
+      markerElement.appendChild(document.querySelector(`.address-icon[name=${name}]`).cloneNode());
       const marker = new mapboxgl.Marker({
         draggable: true,
         element:markerElement
       })
-      .setLngLat([mapData.lng, mapData.lat])
+      .setLngLat(markerLoc)
       .addTo(map);
-      // selectedMarker = marker;
-      // markers.push(marker);
+      marker.markerId = key;
       markerElement.addEventListener('click', function (e) {
         // console.log(e);
         if(selectedMarker) {
           selectedMarker.find('.address-icon').removeClass('active');
         }
         $(this).find('.address-icon').addClass('active');
-        selectedMarker = $(this);
+        selectedMarker = marker;
       });
       function onDragEnd() {
         const lngLat = marker.getLngLat();
         // markerpos.style.display = 'block';
           $("#markerpos").text(`Longitude: ${lngLat.lng} Latitude: ${lngLat.lat}`);
+          mapData.markers[marker.markerId] = [lngLat.lng, lngLat.lat];
+          saveMapData();
       }
       marker.on('dragend', onDragEnd);
     }
-  })
-
-  $(".remove-icon").on({
-    click: function () {
-      if(selectedMarker) {
-        selectedMarker.remove();
-        selectedMarker = undefined;
-      } else {
-        alert("Please select maker!");
-      }
-    }
-  })
+  }
 });
 
-// map.on('click', (event) => {
-// console.log(event);
-// });
-
 $(document).ready(function(){
-
-  mapData:logo_enabled="false";
 
   map.on('moveend',() => {
   
@@ -290,6 +272,7 @@ $(document).ready(function(){
     }
   
     setMapData()
+    saveMapData();
   })
 
   $(".frameOption").on({
@@ -303,6 +286,7 @@ $(document).ready(function(){
         }
         mapData.frameOption = $(this).data('value');
         setMapData();
+        saveMapData();
     }, 
   });
 
@@ -312,7 +296,8 @@ $(document).ready(function(){
       $(this).addClass('active');
       mapData.style_id=$(this).data('style_id')
       map.setStyle("mapbox://styles/hubertuz/" + mapData.style_id);
-      setMapData()
+      setMapData();
+      saveMapData();
     },  
   });
 
@@ -342,6 +327,7 @@ $(document).ready(function(){
     keyup: function(e) {
       mapData.frTitle = $(this).val();
       setMapData();
+      saveMapData();
     }
   });
 
@@ -349,6 +335,7 @@ $(document).ready(function(){
     keyup: function() {
       mapData.backTitle = $(this).val();
       setMapData();
+      saveMapData();
     }
   });
 
@@ -412,40 +399,64 @@ $(document).ready(function(){
       scrollTop: offset
     }, 500);
   });
+
+  $(".address-icon").on({
+    click: function(e) {
+      let markerId = Date.now();
+      var markerElement = document.createElement('div');
+      markerElement.appendChild(e.target.cloneNode());
+      markerElement.setAttribute('data-key', markerId);
+      let key = $(this).attr("name") + "_" + markerId;
+      mapData.markers[key] = [mapData.lng, mapData.lat];
+      const marker = new mapboxgl.Marker({
+        draggable: true,
+        element:markerElement
+      })
+      .setLngLat([mapData.lng, mapData.lat])
+      .addTo(map);
+      marker.markerId = key;
+      // selectedMarker = marker;
+      // markers.push(marker);
+      markerElement.addEventListener('click', function (e) {
+        // console.log(e);
+        if(selectedMarker) {
+          selectedMarker.find('.address-icon').removeClass('active');
+        }
+        $(this).find('.address-icon').addClass('active');
+        selectedMarker = marker;
+      });
+      function onDragEnd(e) {
+        const lngLat = marker.getLngLat();
+        // markerpos.style.display = 'block';
+        $("#markerpos").text(`Longitude: ${lngLat.lng} Latitude: ${lngLat.lat}`);
+        // console.log($(this)._element, e.target)
+          mapData.markers[marker.markerId] = [lngLat.lng, lngLat.lat];
+          saveMapData();
+          // console.log(mapData.markers);
+      }
+      marker.on('dragend', onDragEnd);
+      console.log(mapData.markers);
+      saveMapData();
+    }
+  })
+
+  $(".remove-icon").on({
+    click: function () {
+      if(selectedMarker) {
+        selectedMarker.remove();
+        delete mapData.markers[selectedMarker.markerId];
+        selectedMarker = undefined;
+        saveMapData();
+      } else {
+        alert("Please select icon!");
+      }
+    }
+  })
   
   init();
+
   var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
   var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
     return new bootstrap.Tooltip(tooltipTriggerEl)
   });
-
-  var icon = $('.address-icon');
-  icon.on('dragstart', function(event) {
-    // Set the drag data to the icon image source
-    event.dataTransfer.setData('text', event.target.src);
-  });
-
-  // Add an event listener for the drop event on the map
-  map.on('drop', function(event) {
-    event.preventDefault();
-    console.log('aa')
-
-    // Get the drag data from the event
-    var src = event.dataTransfer.getData('text');
-
-    // Create a new mapbox marker with the icon
-    var marker = new mapboxgl.Marker({
-      draggable: true,
-      element: new Image(32, 32).src = src
-    });
-
-    // Add the marker to the map at the dropped location
-    marker.setLngLat(event.lngLat).addTo(map);
-
-    // Add an event listener for the dragend event on the marker
-    marker.on('dragend', function(event) {
-      console.log('Marker dragged to', event.target.getLngLat());
-    });
-  });
-
 })
