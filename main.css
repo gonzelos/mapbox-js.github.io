@@ -259,6 +259,14 @@ color: #c66a3f;
 font-size: 20px;
 }
 
+.note-title {
+position:absolute;
+font-family: "Snell Roundhand, cursive";
+bottom: -70px;
+color: #c66a3f;
+font-size: 20px;
+}
+
 .color-picker {
 height: 48px;
 }

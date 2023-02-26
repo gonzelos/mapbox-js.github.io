@@ -95,6 +95,7 @@ let mapData =  savedData ? JSON.parse(savedData) : {
   frTitPos: "center",
   frTitle: "San Francisco, California, United States",
   backTitle: "Stand by me forever",
+  noteTitle: "This is the note",
   frameOption: 'oak',
   markers: {},
 };
@@ -141,12 +142,14 @@ function setMapData() {
   $(".citymap-poster-name").text(mapData.frTitle);
   $("#back-string").val(mapData.backTitle);
   $(".back-title").text(mapData.backTitle);
+  $("#note-input").val(mapData.noteTitle);
+  $(".note-title").text(mapData.noteTitle);
   $(".citymap-poster-tagline").text(getDisplayLngLat());
   $(`.size-type-div > .size-unit-wrapper > .size-unit[data-value=${mapData.config.unit}]`).addClass("active");
   $(`.px-scale-wrapper[data-value=${mapData.config.downloadSize}]`).addClass("active");
   $(`.size-type-div > .size-type-wrapper[data-value=${mapData.config.viewType}]`).trigger("click");
   $(`.frameOption[data-value='${mapData.frameOption}']`).trigger("click");
-
+  $(`.form-check-input[name=position-option][value='${mapData.frTitPos}']`).trigger("click");
   $('.map-poster').css("opacity", 1);
 }
 
@@ -320,6 +323,8 @@ $(document).ready(function(){
   $("input[name=position-option]").on({
     change: function(e) {
       $(".citymap-poster-label").css("text-align",$(this).val());
+      mapData.frTitPos = $(this).val();
+      saveMapData();
     }
   });
 
@@ -338,6 +343,14 @@ $(document).ready(function(){
       saveMapData();
     }
   });
+
+  $("#note-input").on({
+    keyup: function() {
+      mapData.noteTitle = $(this).val();
+      setMapData();
+      saveMapData();
+    }
+  })
 
   $("#color-picker").on('change', function(e) {
     $(".address-icon").css("color", $("#color-picker").val());
