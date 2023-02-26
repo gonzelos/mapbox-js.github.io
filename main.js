@@ -95,7 +95,7 @@ let mapData =  savedData ? JSON.parse(savedData) : {
   frTitPos: "center",
   frTitle: "San Francisco, California, United States",
   backTitle: "Stand by me forever",
-  noteTitle: "Contact to sagulezo@gmail.com",
+  noteTitle: "This is the note.",
   frameOption: 'oak',
   markers: {},
 };
