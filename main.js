@@ -87,11 +87,11 @@ let mapData =  savedData ? JSON.parse(savedData) : {
     unit: "cm",
     downloadSize: 500
   },
-  lng: -122.42,//21.06,
-  lat: 37.77,//52.23,
+  lng: -122.44,//21.06,
+  lat: 37.773,//52.23,
   style_id: "clecywkgm002801qro1y8p3eu",
   bearing: 0,
-  zoom: 8.9,
+  zoom: 11,
   frTitPos: "center",
   frTitle: "San Francisco, California, United States",
   backTitle: "Stand by me forever",
@@ -153,12 +153,12 @@ function setMapData() {
   $('.map-poster').css("opacity", 1);
 }
 
-function getImgLink(style_id) {
+function getImgLink(style_id, delta = 0) {
   let [w, h] = config[mapData.config.viewType].viewSize;
-  return `https://api.mapbox.com/styles/v1/hubertuz/${style_id}/static/${mapData.lng},${mapData.lat},${mapData.zoom}/${w}x${h}?access_token=${mapboxgl.accessToken}`;
+  return `https://api.mapbox.com/styles/v1/hubertuz/${style_id}/static/${mapData.lng},${mapData.lat},${mapData.zoom + (delta > 0 ? 1.23 : 0)}/${ delta > 0 ? 1100 : w }x${ delta > 0 ? 1100 : h + delta }?access_token=${mapboxgl.accessToken}`;
 }
 
-function download(imgUrl, fileName) {
+function download(imgUrl, fileName, delta = 0, rotate) {
   var img = new Image();
     img.crossOrigin = 'anonymous';
     img.src = imgUrl;
@@ -180,10 +180,12 @@ function download(imgUrl, fileName) {
       var context = canvas.getContext('2d');
 
       // Draw the image onto the canvas
-      context.drawImage(img, 0, 0, canvas.width, canvas.height);
+      context.drawImage(img, 0, - delta * 0.6,  canvas.width, canvas.height + delta * 1.1);
 
       // Convert the canvas to an image file
       var dataURL = canvas.toDataURL('image/png');
+
+
 
       // Save the image file
       var link = document.createElement('a');
@@ -373,7 +375,7 @@ $(document).ready(function(){
 
 
 
-    download(getImgLink(style_id), fullDate + fileName);
+    download(getImgLink(style_id, 40), fullDate + fileName, 40);
   });
 
   $(".size-type-div > .size-type-wrapper").click(function (e) {
