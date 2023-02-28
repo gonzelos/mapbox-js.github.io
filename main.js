@@ -155,7 +155,7 @@ function setMapData() {
 
 function getImgLink(style_id, delta = 0) {
   let [w, h] = config[mapData.config.viewType].viewSize;
-  return `https://api.mapbox.com/styles/v1/hubertuz/${style_id}/static/${mapData.lng},${mapData.lat},${mapData.zoom + (delta > 0 ? 1.23 : 0)}/${ delta > 0 ? 1100 : w }x${ delta > 0 ? 1100 : h + delta }?access_token=${mapboxgl.accessToken}`;
+  return `https://api.mapbox.com/styles/v1/hubertuz/${style_id}/static/${mapData.lng},${mapData.lat},${mapData.zoom + (delta > 0 ? 1.2 : 0)}/${ delta > 0 ? 1200 : w }x${ delta > 0 ? 1200 : h + delta }?access_token=${mapboxgl.accessToken}`;
 }
 
 function download(imgUrl, fileName, delta = 0, rotate) {
