@@ -262,7 +262,25 @@ map.on('load', () => {
       marker.on('dragend', onDragEnd);
     }
   }
+  var svg = map.getCanvas().toBlob(function (blob) {
+    svg = inline(svg, map.style.stylesheet);
+    var blob = new Blob([svg], {type: 'image/svg+xml'});
+    saveAs(blob, 'map.svg');
+    
+  });
+
+  // let url = map.getCanvas().toDataURL('image/svg+xml', {attribution: false, logo: false});
+  //   downloadSVG(url, 'map.png');
 });
+
+function downloadSVG(url, filename) {
+  let link = document.createElement('a');
+  link.download = filename;
+  link.href = url;
+  document.body.appendChild(link);
+  link.click();
+  document.removeChild(link);
+}
 
 $(document).ready(function(){
 
