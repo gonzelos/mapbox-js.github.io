@@ -160,15 +160,41 @@ function setMapData() {
   $('.map-poster').css("opacity", 1);
 }
 
-// function getImgLink(style_id, vw, vh) {
-//   let [w, h] = config[mapData.config.viewType].viewSize;
-//   return `https://api.mapbox.com/styles/v1/hubertuz/${style_id}/static/${mapData.lng},${mapData.lat},${mapData.zoom}/${}x${}?access_token=${mapboxgl.accessToken}`;
-// }
+function getImgLink(style_id, vw, vh) {
+  return `https://api.mapbox.com/styles/v1/hubertuz/${style_id}/static/${mapData.lng},${mapData.lat},${mapData.zoom}/${vw}x${vh}?access_token=${mapboxgl.accessToken}`;
+}
 
-function download(file_name) {
-  map.getCanvas().toBlob(function (blob) {
-    saveAs(blob, file_name + '.png');
+function download(file_name, style_id) {
+  let vw = $('.map').css('width');
+  let vh = $('.map').css('height');
+  // document.querySelector('.mapboxgl-canvas').toBlob(function (blob) {
+    // saveAs(getImgLink(style_id, vw, vh), file_name + '.png');
+    // console.log(getImgLink(style_id, vw, vh));
+  // });
+
+  let copyMap  = $('<div>', {
+    id: 'copy-map',
+  }).css({
+    width: vw,
+    height: vh,
+    // display: 'none'
   });
+
+  $('body').append(copyMap);
+
+  const map_download = new mapboxgl.Map({
+    container: 'copy-map',
+    style: "mapbox://styles/hubertuz/" + style_id,
+    center: [mapData.lng, mapData.lat],
+    zoom: mapData.zoom
+  });
+
+  map_download.on('load', function () {
+    map_download.getCanvas().toBlob(function (blob) {
+      saveAs(blob, file_name);
+      copyMap.remove();
+    })
+  })
 }
 
 const map = new mapboxgl.Map({
@@ -238,22 +264,23 @@ map.on('load', () => {
       marker.on('dragend', onDragEnd);
     }
   }
-  // download('helo')
-  $(".btn-download").click(function(e) {
-    e.preventDefault();
-    const style_id = $(this).data('style_id');
-    const fileName = $(this).data('file_name');
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = now.getMonth() + 1;
-    const day = now.getDate();
-    const hours = now.getHours();
-    const minutes = now.getMinutes();
-    const seconds = now.getSeconds();
-    const milli = now.getMilliseconds();
-    const fullDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}_${milli}_`;
-    download(fullDate + fileName);
-  });
+});
+
+$(".btn-download").click(function(e) {
+  e.preventDefault();
+  const style_id = $(this).data('style_id');
+  const fileName = $(this).data('file_name');
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth() + 1;
+  const day = now.getDate();
+  const hours = now.getHours();
+  const minutes = now.getMinutes();
+  const seconds = now.getSeconds();
+  const milli = now.getMilliseconds();
+  const fullDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}_${milli}_`;
+  // map.setStyle("mapbox://styles/hubertuz/" + style_id);
+  download(fullDate + fileName, style_id);
 });
 
 $(document).ready(function(){
