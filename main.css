@@ -234,7 +234,7 @@ cursor: pointer;
 
 .citymap-poster-label {
 position: absolute;
-bottom: 31px;
+bottom: 24px;
 text-align: center;
 font-size: 15px;
 font-family: "Impact, fantasy";
@@ -302,7 +302,7 @@ color: #00853e;
 }
 
 .address-icon {
-font-size:24px;
+font-size:35px;
 color:black;
 /* padding-right:15px; */
 /* display: block; */
