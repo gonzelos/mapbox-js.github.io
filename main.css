@@ -302,15 +302,21 @@ color: #00853e;
 }
 
 .address-icon {
-font-size:35px;
-color:black;
-/* padding-right:15px; */
-/* display: block; */
+font-size: 18px;
+padding-right:15px;
 cursor: pointer;
 }
 
+.mapboxgl-marker.mapboxgl-marker-anchor-center .address-icon {
+font-size:60px;
+}
+
 .address-icon:hover {
-font-size:28px;
+font-size:22px;
+}
+
+.mapboxgl-marker.mapboxgl-marker-anchor-center .address-icon:hover {
+font-size:70px;
 }
 
 .address-icon.active {

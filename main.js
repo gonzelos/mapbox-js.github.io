@@ -252,7 +252,7 @@ map.on('load', () => {
           selectedMarker.find('.address-icon').removeClass('active');
         }
         $(this).find('.address-icon').addClass('active');
-        selectedMarker = marker;
+        selectedMarker = $(this);
       });
       function onDragEnd() {
         const lngLat = marker.getLngLat();
@@ -437,7 +437,7 @@ $(document).ready(function(){
           selectedMarker.find('.address-icon').removeClass('active');
         }
         $(this).find('.address-icon').addClass('active');
-        selectedMarker = marker;
+        selectedMarker = $(this);
       });
       function onDragEnd(e) {
         const lngLat = marker.getLngLat();
