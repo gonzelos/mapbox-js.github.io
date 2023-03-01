@@ -85,13 +85,13 @@ let mapData =  savedData ? JSON.parse(savedData) : {
     viewType: "square",
     scale: 0,
     unit: "cm",
-    downloadSize: 500
+    downloadSize: 2000
   },
   lng: -122.44,//21.06,
   lat: 37.773,//52.23,
   style_id: "clecywkgm002801qro1y8p3eu",
   bearing: 0,
-  zoom: 11,
+  zoom: 11.68,
   frTitPos: "center",
   frTitle: "San Francisco, California, United States",
   backTitle: "Stand by me forever",
@@ -105,12 +105,21 @@ function saveMapData() {
 }
 
 function setMapView(w, h) {
-  $("#map").css('width', w);
-  $("#map").css('height', h);
+  let vw = 1280;
+  let vh = 1280;
+  // if(mapData.config.viewType != "square") { 
+    vw = (w - 12) / 0.334375;
+    vh = (h - 12)  / 0.334375;
+  // }
+  $('.map').css('width', vw);
+  $('.map').css('height', vh);
+  $('.map-view').css('width', w);
+  $('.map-view').css('height', h);
+  $('.map').css('margin-top', -(vh - h + 12) / 2);
+  $('.map').css('margin-left', -(vw - w + 12) / 2);
   $(".map-poster").css('width', w + 100);
   $(".map-poster").css('height', h + 120);
   map.resize();
-  // $(".mapboxgl-ctrl-logo").remove();
 }
 
 function renderScaleButton() {
@@ -135,8 +144,6 @@ function renderScaleButton() {
 }
 
 function setMapData() {
-  const str = getImgLink(mapData.style_id);
-  $("#downloadImage").attr('href', str);
   // $("#image").attr("src", str);
   $("#front-string").val(mapData.frTitle);
   $(".citymap-poster-name").text(mapData.frTitle);
@@ -153,46 +160,15 @@ function setMapData() {
   $('.map-poster').css("opacity", 1);
 }
 
-function getImgLink(style_id, delta = 0) {
-  let [w, h] = config[mapData.config.viewType].viewSize;
-  return `https://api.mapbox.com/styles/v1/hubertuz/${style_id}/static/${mapData.lng},${mapData.lat},${mapData.zoom + (delta > 0 ? 1.2 : 0)}/${ delta > 0 ? 1200 : w }x${ delta > 0 ? 1200 : h + delta }?access_token=${mapboxgl.accessToken}`;
-}
+// function getImgLink(style_id, vw, vh) {
+//   let [w, h] = config[mapData.config.viewType].viewSize;
+//   return `https://api.mapbox.com/styles/v1/hubertuz/${style_id}/static/${mapData.lng},${mapData.lat},${mapData.zoom}/${}x${}?access_token=${mapboxgl.accessToken}`;
+// }
 
-function download(imgUrl, fileName, delta = 0, rotate) {
-  var img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.src = imgUrl;
-    // Create a canvas element
-    img.onload = () => {
-      var canvas = document.createElement('canvas');
-      let viewType = mapData.config.viewType;
-      if(viewType == "square") {
-        canvas.width = canvas.height = mapData.config.downloadSize;
-      } else if(viewType == "portrait") {
-        canvas.width = mapData.config.downloadSize * 0.87;
-        canvas.height = mapData.config.downloadSize * 1.13;
-      } else {
-        canvas.width = mapData.config.downloadSize * 1.13;
-        canvas.height = mapData.config.downloadSize * 0.87;
-      }
-
-      // Get the rendering context for the canvas
-      var context = canvas.getContext('2d');
-
-      // Draw the image onto the canvas
-      context.drawImage(img, 0, - delta * 0.6,  canvas.width, canvas.height + delta * 1.1);
-
-      // Convert the canvas to an image file
-      var dataURL = canvas.toDataURL('image/png');
-
-
-
-      // Save the image file
-      var link = document.createElement('a');
-      link.download = `${fileName}.png`;
-      link.href = dataURL;
-      link.click();
-    }
+function download(file_name) {
+  map.getCanvas().toBlob(function (blob) {
+    saveAs(blob, file_name + '.png');
+  });
 }
 
 const map = new mapboxgl.Map({
@@ -262,25 +238,23 @@ map.on('load', () => {
       marker.on('dragend', onDragEnd);
     }
   }
-  var svg = map.getCanvas().toBlob(function (blob) {
-    svg = inline(svg, map.style.stylesheet);
-    var blob = new Blob([svg], {type: 'image/svg+xml'});
-    saveAs(blob, 'map.svg');
-    
+  // download('helo')
+  $(".btn-download").click(function(e) {
+    e.preventDefault();
+    const style_id = $(this).data('style_id');
+    const fileName = $(this).data('file_name');
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1;
+    const day = now.getDate();
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+    const seconds = now.getSeconds();
+    const milli = now.getMilliseconds();
+    const fullDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}_${milli}_`;
+    download(fullDate + fileName);
   });
-
-  // let url = map.getCanvas().toDataURL('image/svg+xml', {attribution: false, logo: false});
-  //   downloadSVG(url, 'map.png');
 });
-
-function downloadSVG(url, filename) {
-  let link = document.createElement('a');
-  link.download = filename;
-  link.href = url;
-  document.body.appendChild(link);
-  link.click();
-  document.removeChild(link);
-}
 
 $(document).ready(function(){
 
@@ -374,26 +348,6 @@ $(document).ready(function(){
 
   $("#color-picker").on('change', function(e) {
     $(".address-icon").css("color", $("#color-picker").val());
-  });
-
-  $(".btn-download").click(function(e) {
-    e.preventDefault();
-    
-    const style_id = $(this).data('style_id');
-    const fileName = $(this).data('file_name');
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = now.getMonth() + 1;
-    const day = now.getDate();
-    const hours = now.getHours();
-    const minutes = now.getMinutes();
-    const seconds = now.getSeconds();
-    const milli = now.getMilliseconds();
-    const fullDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}_${milli}_`;
-
-
-
-    download(getImgLink(style_id, 40), fullDate + fileName, 40);
   });
 
   $(".size-type-div > .size-type-wrapper").click(function (e) {
