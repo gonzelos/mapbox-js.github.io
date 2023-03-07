@@ -91,7 +91,7 @@ let mapData =  savedData ? JSON.parse(savedData) : {
   lat: 37.773,//52.23,
   style_id: "clecywkgm002801qro1y8p3eu",
   bearing: 0,
-  zoom: 11.68,
+  zoom: 13,
   frTitPos: "center",
   frTitle: "San Francisco, California, United States",
   backTitle: "Stand by me forever",
@@ -99,6 +99,17 @@ let mapData =  savedData ? JSON.parse(savedData) : {
   frameOption: 'oak',
   markers: {},
 };
+
+function loading(status = true, title = 'loading...') {
+  if(status) {
+    $("body").css('overflow', 'hidden');
+    $('.spinner-view').find('p').text(title);
+    $('.spinner-view').show();
+  } else {
+    $("body").css('overflow', 'initial');
+    $('.spinner-view').hide();
+  }
+}
 
 function saveMapData() {
   localStorage.setItem("currentMapData", JSON.stringify(mapData));
@@ -158,6 +169,7 @@ function setMapData() {
   $(`.frameOption[data-value='${mapData.frameOption}']`).trigger("click");
   $(`.form-check-input[name=position-option][value='${mapData.frTitPos}']`).trigger("click");
   $('.map-poster').css("opacity", 1);
+  $("#zoomval").text(getDisplayZoom());
 }
 
 function getImgLink(style_id, vw, vh) {
@@ -165,8 +177,11 @@ function getImgLink(style_id, vw, vh) {
 }
 
 function download(file_name, style_id) {
-  let vw = $('.map').css('width');
-  let vh = $('.map').css('height');
+  loading(true, 'Map generating...');
+  let vw = Number($('#download-image-size').val());
+  let mvw = Number($('.map').css('width').replace('px', ''));
+  let mvh = Number($('.map').css('height').replace('px', ''));
+  let vh = vw * mvh / mvw;
   // document.querySelector('.mapboxgl-canvas').toBlob(function (blob) {
     // saveAs(getImgLink(style_id, vw, vh), file_name + '.png');
     // console.log(getImgLink(style_id, vw, vh));
@@ -177,7 +192,6 @@ function download(file_name, style_id) {
   }).css({
     width: vw,
     height: vh,
-    // display: 'none'
   });
 
   $('body').append(copyMap);
@@ -186,13 +200,14 @@ function download(file_name, style_id) {
     container: 'copy-map',
     style: "mapbox://styles/hubertuz/" + style_id,
     center: [mapData.lng, mapData.lat],
-    zoom: mapData.zoom
+    zoom: mapData.zoom + Math.log(vw / mvw) / Math.log(2)
   });
 
   map_download.on('load', function () {
     map_download.getCanvas().toBlob(function (blob) {
       saveAs(blob, file_name);
       copyMap.remove();
+      loading(false);
     })
   })
 }
@@ -209,6 +224,10 @@ function getDisplayLngLat() {
   return `${Math.abs(mapData.lng).toFixed(2)}° N, ${Math.abs(mapData.lat).toFixed(2)}° E`;
 }
 
+function getDisplayZoom() {
+  return Math.abs(mapData.zoom).toFixed(1);
+}
+
 function init() {
   $(".mapboxgl-ctrl-logo").remove();
   $(".mapboxgl-ctrl-bottom-right").remove();
@@ -221,8 +240,9 @@ const geocoderSearch = new MapboxGeocoder({
     placeholder: 'Enter search e.g. Lincoln Park',
     mapboxgl: mapboxgl
 });
-
-map.on('load', () => {
+loading();
+map.on('load', () => {  
+  $('.spinner-view').hide();
   let serarchInput = geocoderSearch.onAdd(map);
   $("#geocoderSearchWrap").append(serarchInput);
   map.addControl(new mapboxgl.NavigationControl());
@@ -257,13 +277,14 @@ map.on('load', () => {
       function onDragEnd() {
         const lngLat = marker.getLngLat();
         // markerpos.style.display = 'block';
-          $("#markerpos").text(`Longitude: ${lngLat.lng} Latitude: ${lngLat.lat}`);
-          mapData.markers[marker.markerId] = [lngLat.lng, lngLat.lat];
-          saveMapData();
+        $("#markerpos").text(`Longitude: ${lngLat.lng} Latitude: ${lngLat.lat}`);
+        mapData.markers[marker.markerId] = [lngLat.lng, lngLat.lat];
+        saveMapData();
       }
       marker.on('dragend', onDragEnd);
     }
   }
+  loading(false);
 });
 
 $(".btn-download").click(function(e) {
@@ -371,7 +392,7 @@ $(document).ready(function(){
       setMapData();
       saveMapData();
     }
-  })
+  });
 
   $("#color-picker").on('change', function(e) {
     $(".address-icon").css("color", $("#color-picker").val());
@@ -473,4 +494,5 @@ $(document).ready(function(){
   var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
     return new bootstrap.Tooltip(tooltipTriggerEl)
   });
+ 
 })
