@@ -111,6 +111,8 @@ function loading(status = true, title = 'loading...') {
   }
 }
 
+loading();
+
 function saveMapData() {
   localStorage.setItem("currentMapData", JSON.stringify(mapData));
 }
@@ -240,7 +242,6 @@ const geocoderSearch = new MapboxGeocoder({
     placeholder: 'Enter search e.g. Lincoln Park',
     mapboxgl: mapboxgl
 });
-loading();
 map.on('load', () => {  
   $('.spinner-view').hide();
   let serarchInput = geocoderSearch.onAdd(map);
