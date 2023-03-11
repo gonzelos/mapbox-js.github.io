@@ -117,12 +117,14 @@ function saveMapData() {
   localStorage.setItem("currentMapData", JSON.stringify(mapData));
 }
 
-function setMapView(w, h) {
-  let vw = 1280;
-  let vh = 1280;
+function setMapView(w, h, dZoom = 1) {
+  w = Number(w);
+  h = Number(h);
+  let vw = 1280 * dZoom;
+  let vh = 1280 * dZoom;
   // if(mapData.config.viewType != "square") { 
-    vw = (w - 12) / 0.334375;
-    vh = (h - 12)  / 0.334375;
+    vw = (w - 12) / 0.334375 * dZoom;
+    vh = (h - 12)  / 0.334375 * dZoom;
   // }
   $('.map').css('width', vw);
   $('.map').css('height', vh);
@@ -132,7 +134,13 @@ function setMapView(w, h) {
   $('.map').css('margin-left', -(vw - w + 12) / 2);
   $(".map-poster").css('width', w + 100);
   $(".map-poster").css('height', h + 120);
+  // transform: scale(0.334375);
+  $(".map").css('transform', `scale(${0.334375 / dZoom})`);
+  
   map.resize();
+  // mapData.zoom = mapData.zoom - dZoom + 1;
+  // console.log(mapData.zoom);
+  // map.setZoom(mapData.zoom);
 }
 
 function renderScaleButton() {
@@ -156,7 +164,7 @@ function renderScaleButton() {
   });
 }
 
-function setMapData() {
+function setMapData(flag = true) {
   // $("#image").attr("src", str);
   $("#front-string").val(mapData.frTitle);
   $(".citymap-poster-name").text(mapData.frTitle);
@@ -167,7 +175,7 @@ function setMapData() {
   $(".citymap-poster-tagline").text(getDisplayLngLat());
   $(`.size-type-div > .size-unit-wrapper > .size-unit[data-value=${mapData.config.unit}]`).addClass("active");
   $(`.px-scale-wrapper[data-value=${mapData.config.downloadSize}]`).addClass("active");
-  $(`.size-type-div > .size-type-wrapper[data-value=${mapData.config.viewType}]`).trigger("click");
+  if(flag) $(`.size-type-div > .size-type-wrapper[data-value=${mapData.config.viewType}]`).trigger("click");
   $(`.frameOption[data-value='${mapData.frameOption}']`).trigger("click");
   $(`.form-check-input[name=position-option][value='${mapData.frTitPos}']`).trigger("click");
   $('.map-poster').css("opacity", 1);
@@ -307,17 +315,19 @@ $(".btn-download").click(function(e) {
 
 $(document).ready(function(){
 
-  map.on('moveend',() => {
-  
+  map.on('moveend', () => {
+    let {lng, lat} = map.getCenter();
+    let zoom = map.getZoom();
+    // let {oLng, oLat, oZoom} = mapData;
+
     mapData = {
       ...mapData,
-      lng: map.getCenter().lng,
-      lat: map.getCenter().lat,
-      zoom: map.getZoom(),
+      lng,
+      lat,
+      zoom,
       bearing:  map.getBearing(),
     }
-  
-    setMapData()
+    setMapData(false);
     saveMapData();
   })
 
@@ -400,6 +410,7 @@ $(document).ready(function(){
   });
 
   $(".size-type-div > .size-type-wrapper").click(function (e) {
+    console.log(e);
     $('.size-type-div > .size-type-wrapper').removeClass('active');
     $(this).addClass('active');
     let viewType = $(this).data('value');
@@ -487,7 +498,31 @@ $(document).ready(function(){
         alert("Please select icon!");
       }
     }
-  })
+  });
+
+  $('#vWidth').on('input', function (e) {
+    let vWidth = $(this).val();
+    let vHeight = $('#vHeight').val();
+    $(this).prev().text(`Width : ${vWidth}px`);
+    let dZoom = $('#dZoom').val();
+    setMapView(vWidth, vHeight, dZoom);
+  });
+  
+  $('#vHeight').on('input', function (e) {
+    let vWidth = $('#vWidth').val();
+    let vHeight = $(this).val();
+    let dZoom = $('#dZoom').val();
+    $(this).prev().text(`Height : ${vHeight}px`);
+    setMapView(vWidth, vHeight, dZoom);
+  });
+  
+  $('#dZoom').on('input', function (e) {
+    let vWidth = $('#vWidth').val();
+    let vHeight = $('#vHeight').val();
+    let dZoom = $(this).val();
+    $(this).prev().text(`Level : ${dZoom}`);
+    setMapView(vWidth, vHeight, dZoom);
+  });
   
   init();
 
