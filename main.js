@@ -92,6 +92,7 @@ let mapData =  savedData ? JSON.parse(savedData) : {
   style_id: "clecywkgm002801qro1y8p3eu",
   bearing: 0,
   zoom: 13,
+  dZoom: 0,
   frTitPos: "center",
   frTitle: "San Francisco, California, United States",
   backTitle: "Stand by me forever",
@@ -117,14 +118,25 @@ function saveMapData() {
   localStorage.setItem("currentMapData", JSON.stringify(mapData));
 }
 
+function calcZoom() {
+  let dZoom = Number($('#dZoom').val()) ;
+  let rate = dZoom > 1 ? 1.5 : 0.8;
+  rate = (dZoom == 1 ? dZoom : rate);
+  let zoom = map.getZoom();
+  dZoom = Math.log(dZoom * rate) / Math.log(2);
+  zoom = zoom - mapData.dZoom;
+  return {zoom, dZoom};
+}
+
 function setMapView(w, h, dZoom = 1) {
   w = Number(w);
   h = Number(h);
-  let vw = 1280 * dZoom;
-  let vh = 1280 * dZoom;
+  let rate = dZoom > 1 ? 1.5 : 0.8;
+  rate = (dZoom == 1 ? dZoom : rate);
+  let mapSizeRate = 0.18;
   // if(mapData.config.viewType != "square") { 
-    vw = (w - 12) / 0.334375 * dZoom;
-    vh = (h - 12)  / 0.334375 * dZoom;
+  let vw = (w - 12) / mapSizeRate * dZoom * rate;
+  let vh = (h - 12)  / mapSizeRate * dZoom * rate;
   // }
   $('.map').css('width', vw);
   $('.map').css('height', vh);
@@ -134,13 +146,12 @@ function setMapView(w, h, dZoom = 1) {
   $('.map').css('margin-left', -(vw - w + 12) / 2);
   $(".map-poster").css('width', w + 100);
   $(".map-poster").css('height', h + 120);
-  // transform: scale(0.334375);
-  $(".map").css('transform', `scale(${0.334375 / dZoom})`);
+  // transform: scale(0.25);
+  $(".map").css('transform', `scale(${mapSizeRate / dZoom / rate})`);
   
   map.resize();
-  // mapData.zoom = mapData.zoom - dZoom + 1;
-  // console.log(mapData.zoom);
-  // map.setZoom(mapData.zoom);
+  mapData.dZoom = Math.log(dZoom * rate) / Math.log(2);
+  map.setZoom(mapData.zoom + mapData.dZoom);
 }
 
 function renderScaleButton() {
@@ -189,8 +200,8 @@ function getImgLink(style_id, vw, vh) {
 function download(file_name, style_id) {
   loading(true, 'Map generating...');
   let vw = Number($('#download-image-size').val());
-  let mvw = Number($('.map').css('width').replace('px', ''));
-  let mvh = Number($('.map').css('height').replace('px', ''));
+  let mvw = Number($('.map').find('canvas').css('width').replace('px', ''));
+  let mvh = Number($('.map').find('canvas').css('height').replace('px', ''));
   let vh = vw * mvh / mvw;
   // document.querySelector('.mapboxgl-canvas').toBlob(function (blob) {
     // saveAs(getImgLink(style_id, vw, vh), file_name + '.png');
@@ -200,8 +211,8 @@ function download(file_name, style_id) {
   let copyMap  = $('<div>', {
     id: 'copy-map',
   }).css({
-    width: vw,
-    height: vh,
+    width: mvw,
+    height: mvh,
   });
 
   $('body').append(copyMap);
@@ -210,14 +221,31 @@ function download(file_name, style_id) {
     container: 'copy-map',
     style: "mapbox://styles/hubertuz/" + style_id,
     center: [mapData.lng, mapData.lat],
-    zoom: mapData.zoom + Math.log(vw / mvw) / Math.log(2)
+    zoom: map.getZoom()
   });
 
   map_download.on('load', function () {
     map_download.getCanvas().toBlob(function (blob) {
-      saveAs(blob, file_name);
+      let img = new Image();
+      img.src = URL.createObjectURL(blob);
+      img.onload = function () {
+        let canvas = document.createElement('canvas');
+        canvas.width = vw;
+        canvas.height = vh;
+        canvas.className = "download-canvas";
+        $('body').append(canvas);
+        let ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, vw, vh);
+        let dataURL = canvas.toDataURL('image/png');
+        let link = document.createElement('a');
+        link.href = dataURL;
+        link.download = file_name;
+        link.click();
+        $('body').find('.download-canvas').remove();
+        loading(false);
+      }
       copyMap.remove();
-      loading(false);
+      // saveAs(blob, file_name);
     })
   })
 }
@@ -226,7 +254,7 @@ const map = new mapboxgl.Map({
   container: 'map',
   style: "mapbox://styles/hubertuz/" + mapData.style_id,
   center: [mapData.lng, mapData.lat],
-  zoom: mapData.zoom,
+  zoom: mapData.zoom + mapData.dZoom,
   scrollZoom: true
 });
 
@@ -293,6 +321,7 @@ map.on('load', () => {
       marker.on('dragend', onDragEnd);
     }
   }
+  $('.map-view').append($('.mapboxgl-control-container'));
   loading(false);
 });
 
@@ -317,14 +346,16 @@ $(document).ready(function(){
 
   map.on('moveend', () => {
     let {lng, lat} = map.getCenter();
-    let zoom = map.getZoom();
+    let {zoom, dZoom} = calcZoom();
     // let {oLng, oLat, oZoom} = mapData;
+    console.log(zoom);
 
     mapData = {
       ...mapData,
       lng,
       lat,
       zoom,
+      dZoom,
       bearing:  map.getBearing(),
     }
     setMapData(false);
